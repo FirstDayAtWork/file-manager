@@ -4,9 +4,10 @@ import { fileURLToPath } from 'node:url';
 import readline from 'node:readline/promises';
 import { pipeline } from 'stream/promises';
 import os from 'node:os';
+import zlib from 'node:zlib';
+import { createHash } from 'node:crypto';
 import { parseArgs } from './utils/parseArgs.js';
 import { checkType } from './utils/checkType.js';
-import { createHash } from 'node:crypto';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -263,6 +264,60 @@ const __dirname = path.dirname(__filename);
 
       console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
     }
+
+    if (/^compress\s+\w+/.test(answer)) {
+      if (/(?<=compress)(\s+\w+\.\w+\s*)$/.test(answer)) {
+        const value = answer.match(/(?<=\s+)\w+\.\w+(?=\s*)/);
+        const filePath = path.join(currentPath, value[0]);
+        const newPath = path.join(currentPath, `${value[0]}.br`);
+
+        try {
+            const file = await fs.open(filePath);
+            const streamRead = file.createReadStream();
+            const fileNew = await fs.open(newPath, 'w+');
+            const streamWrite = fileNew.createWriteStream();
+            const br = zlib.createBrotliCompress();
+
+            await pipeline(streamRead, br, streamWrite);
+            await fs.rm(filePath);
+            console.log(`\nCompress ${filePath} to ${newPath}`);
+        } catch (error) {
+          console.log(`\x1b[31mOperation failed\x1b[0m!, file \x1b[31m${value[0]}\x1b[0m not exist`);
+        }
+      } else {
+        console.log(`\n\x1b[33mInvalid Input\x1b[0m!`);
+      }
+
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+        if (/^decompress\s+\w+/.test(answer)) {
+          if (/(?<=decompress)(\s+\w+(\.\w+)+\s*)$/.test(answer)) {
+            const value = answer.match(/(?<=\s+)\w+(\.\w+)+(?=\s*)/);
+            const filePath = path.join(currentPath, value[0]);
+            const newPath = path.join(currentPath, `${value[0].replace(/\.br$/, '')}`);
+
+            try {
+              const file = await fs.open(filePath);
+              const streamRead = file.createReadStream();
+              const fileNew = await fs.open(newPath, "w+");
+              const streamWrite = fileNew.createWriteStream();
+              const br = zlib.createBrotliDecompress();
+
+              await pipeline(streamRead, br, streamWrite);
+              await fs.rm(filePath);
+              console.log(`\nDecompress ${filePath} to ${newPath}`);
+            } catch (error) {
+              console.log(
+                `\x1b[31mOperation failed\x1b[0m!, file \x1b[31m${value[0]}\x1b[0m not exist`
+              );
+            }
+          } else {
+            console.log(`\n\x1b[33mInvalid Input\x1b[0m!`);
+          }
+
+          console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+        }
 
   })
 
