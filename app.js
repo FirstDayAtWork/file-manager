@@ -6,6 +6,7 @@ import { pipeline } from 'stream/promises';
 import os from 'node:os';
 import { parseArgs } from './utils/parseArgs.js';
 import { checkType } from './utils/checkType.js';
+import { createHash } from 'node:crypto';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -235,6 +236,34 @@ const __dirname = path.dirname(__filename);
       console.log(`\n\x1b[32m${os.arch()}\x1b[0m`)
       console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
     }
+
+    if (/^hash\s+\w+/.test(answer)) {
+      if (/(?<=hash)(\s+\w+\.\w+\s*)$/.test(answer)) {
+        const value = answer.match(/(?<=\s+)\w+\.\w+(?=\s*)/);
+        const filePath = path.join(currentPath, value[0]);
+
+        try {
+          const file = await fs.open(filePath);
+          const hash = createHash('sha256');
+          const stream = file.createReadStream();
+          
+          stream.on('data', (chunk) => {
+            hash.update(chunk);
+          })
+
+          stream.on('end', () => {
+            console.log(`\n\x1b[32m${hash.digest('hex')}\x1b[0m`);
+          })
+        } catch (error) {
+          console.log(`\x1b[31mOperation failed\x1b[0m!, file \x1b[31m${value[0]}\x1b[0m not exist`);
+        }
+      } else {
+        console.log(`\n\x1b[33mInvalid Input\x1b[0m!`);
+      }
+
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
   })
 
   
