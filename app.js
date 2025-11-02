@@ -80,12 +80,53 @@ const __dirname = path.dirname(__filename);
          console.log('\n' + 'Success')
          
        } catch (error) {
-         console.log(`\x1b[31mOperation failed\x1b[0m!, can't access \x1b[31m${testPath}\x1b[0m`, error)
+         console.log(`\x1b[31mOperation failed\x1b[0m!, can't access \x1b[31m${testPath}\x1b[0m`)
        }
        
        console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
     }
+
+    
+    if (/^add\s+\w+/.test(answer)) {
+       const value = answer.replace(/^add\s+/, '');
+       const testPath = path.join(currentPath, value);
+
+       try {
+          await fs.access(testPath);
+          console.log(`File \x1b[31m${value}\x1b[0m already exist`)
+       } catch (error) {
+          try {
+            await fs.open(testPath, 'w');
+            console.log('\n' + `File ${value} created`);
+          } catch (error) {
+            console.log(`\x1b[31mOperation failed\x1b[0m!, can't create file \x1b[31m${value}\x1b[0m`)
+          }
+       }
+       
+       console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+    if (/^mkdir\s+\w+/.test(answer)) {
+       const value = answer.replace(/^mkdir\s+/, '');
+       const testPath = path.join(currentPath, value);
+
+       try {
+          await fs.access(testPath);
+          console.log(`Directory \x1b[31m${value}\x1b[0m already exist`)
+       } catch (error) {
+          try {
+            await fs.mkdir(testPath);
+            console.log('\n' + `Directory ${value} created`);
+          } catch (error) {
+            console.log(`\x1b[31mOperation failed\x1b[0m!, can't create folder \x1b[31m${value}\x1b[0m`)
+          }
+       }
+       
+       console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
   })
+
   
   rl.on('SIGINT', () => {
     console.log(`\nThank you for using File Manager, \x1b[34m${args.username}\x1b[0m!, goodbye!`);
