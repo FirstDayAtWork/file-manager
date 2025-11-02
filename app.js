@@ -210,6 +210,31 @@ const __dirname = path.dirname(__filename);
 
       console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
     }
+
+    if (/^os\s+--EOL\s*/.test(answer)) {
+      console.log('\n' + JSON.stringify(os.EOL))
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+    if (/^os\s+--cpus\s*/.test(answer)) {
+      console.log(os.cpus())
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+    if (/^os\s+--homedir\s*/.test(answer)) {
+      console.log(`\n\x1b[32m${os.homedir()}\x1b[0m`)
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+    if (/^os\s+--username\s*/.test(answer)) {
+      console.log(`\n\x1b[32m${os.userInfo().username}\x1b[0m`);
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+    if (/^os\s+--architecture\s*/.test(answer)) {
+      console.log(`\n\x1b[32m${os.arch()}\x1b[0m`)
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
   })
 
   
