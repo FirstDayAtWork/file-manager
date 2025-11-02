@@ -7,6 +7,7 @@ import zlib from "node:zlib";
 import { createHash } from "node:crypto";
 import { parseArgs } from "./utils/parseArgs.js";
 import { checkType } from "./utils/checkType.js";
+import { commands } from "./utils/commands.js";
 
 (() => {
   let currentPath = os.homedir();
@@ -21,8 +22,21 @@ import { checkType } from "./utils/checkType.js";
   );
   console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
 
+  rl.setPrompt("Wanna see commands? y/n\n");
+  rl.prompt();
+
   rl.on("line", async (answer) => {
     answer = answer.trim();
+
+    if (answer === "y") {
+      console.table(commands);
+      rl.setPrompt("");
+    }
+
+    if (answer === "n") {
+      rl.setPrompt("");
+    }
+
     if (answer === ".exit") {
       console.log(
         `\nThank you for using File Manager, \x1b[34m${args.username}\x1b[0m!, goodbye!`
@@ -45,13 +59,17 @@ import { checkType } from "./utils/checkType.js";
         const currentDir = await fs.readdir(currentPath, {
           withFileTypes: true,
         });
-        const array = currentDir.reduce((a, b) => {
-          const object = {
-            name: b.name.slice(0, 20),
-            type: checkType(b),
-          };
-          return [...a, object];
-        }, []);
+        const array = currentDir
+          .reduce((a, b) => {
+            const object = {
+              name: b.name.slice(0, 20),
+              type: checkType(b),
+            };
+            return [...a, object];
+          }, [])
+          .sort((a, b) =>
+            a.type.toLowerCase().localeCompare(b.type.toLowerCase())
+          );
 
         console.table(array);
       } catch (error) {
