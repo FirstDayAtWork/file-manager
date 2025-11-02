@@ -168,7 +168,48 @@ const __dirname = path.dirname(__filename);
       console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
     }
 
+    if (/^mv\s+\w+/.test(answer)) {
+      if (/(?<=mv)(\s+\w+\.\w+\s*){2}$/.test(answer)) {
+        const value = answer.match(/(?<=\s+)\w+\.\w+(?=\s*)/g);
+        const oldPath = path.join(currentPath, value[0]);
+        const newPath = path.join(currentPath, value[1]);
+  
+        try {
+            const file = await fs.open(oldPath);
+            const stream = file.createReadStream();
+            const newFile = await fs.open(newPath, 'wx');
+            const newStream = newFile.createWriteStream();
+            await pipeline(stream, newStream);
+            await fs.rm(oldPath);
+            console.log('\n' + `File ${value[0]} moved to ${value[1]}`);
+        } catch (error) {
+            console.log(`\x1b[31mOperation failed\x1b[0m!, file \x1b[31m${value[0]}\x1b[0m not exist`);
+        }
+      } else {
+        console.log(`\n\x1b[33mInvalid Input\x1b[0m!`);
+      }
 
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
+
+    if (/^rm\s+\w+/.test(answer)) {
+      if (/(?<=rm)(\s+\w+\.\w+\s*)$/.test(answer)) {
+        const value = answer.match(/(?<=\s+)\w+\.\w+(?=\s*)/g);
+        const filePath = path.join(currentPath, value[0]);
+  
+        try {
+            await fs.access(filePath);
+            await fs.rm(filePath);
+            console.log('\n' + `File ${value[0]} removed`);
+        } catch (error) {
+            console.log(`\x1b[31mOperation failed\x1b[0m!, file \x1b[31m${value[0]}\x1b[0m not exist`);
+        }
+      } else {
+        console.log(`\n\x1b[33mInvalid Input\x1b[0m!`);
+      }
+
+      console.log(`\nYou are currently in \x1b[32m${currentPath}\x1b[0m`);
+    }
   })
 
   
